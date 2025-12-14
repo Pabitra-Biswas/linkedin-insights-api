@@ -1,0 +1,43 @@
+name: CI - Build & Test
+
+# Trigger: Run this whenever code is pushed to the main branch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Download your code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Create a fake .env file
+      # (Docker needs .env to exist to build, even if values are fake)
+      - name: Create .env file from example
+        run: |
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            echo "GEMINI_MODEL=gemini-1.5-flash" > .env
+            echo "OPENAI_API_KEY=fake-key" >> .env
+            echo "HEADLESS_MODE=True" >> .env
+          fi
+
+      # 3. Build the Docker Image
+      # This checks if your Dockerfile and requirements.txt are correct
+      - name: Build Docker Container
+        run: docker compose build api
+
+      # 4. (Optional) Run a quick health check
+      # This starts the container for 10 seconds to make sure it doesn't crash immediately
+      - name: Test Container Startup
+        run: |
+          docker compose up -d api
+          sleep 10
+          docker compose ps
+          docker compose logs api
