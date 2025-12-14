@@ -25,3 +25,6 @@ local.db
 # --- IDE Settings ---
 .vscode/
 .idea/
+
+
+echo "check_models.py" >> .gitignore
