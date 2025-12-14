@@ -1,0 +1,52 @@
+services:
+  api:
+    build: .
+    container_name: linkedin-insights-api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017
+      - REDIS_URL=redis://redis:6379
+      - DEBUG=False
+      - HEADLESS_MODE=True           # ⚠️ MUST be True for Docker
+      - LOCAL_STORAGE_PATH=/app/data/uploads
+      - DATABASE_URL=sqlite:////app/local.db
+      
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      # Maps your entire project folder to /app inside Docker
+      # This allows Docker to see the 'data/uploads/linkedin_cookies.pkl' file
+      - ./:/app
+    
+    # -----------------------------------------------------------
+    # ⭐ CHROME STABILITY SETTINGS (Required for Selenium)
+    # -----------------------------------------------------------
+    shm_size: "2gb"                  # Prevents "DevToolsActivePort" crashes
+    security_opt:
+      - seccomp=unconfined           # Allows Chrome sandbox to work properly
+    
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    container_name: linkedin-insights-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: linkedin-insights-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

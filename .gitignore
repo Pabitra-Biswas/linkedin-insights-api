@@ -1,0 +1,27 @@
+.env
+.env.local
+*.pkl
+linkedin_cookies.pkl
+linkedin_cookies
+id_rsa
+id_rsa.pub
+
+# --- Python & Virtual Env ---
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# --- Docker & Data ---
+data/uploads/*
+!data/uploads/.gitkeep
+mongo_data/
+redis_data/
+local.db
+*.sqlite3
+*.log
+
+# --- IDE Settings ---
+.vscode/
+.idea/
